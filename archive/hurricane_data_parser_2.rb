@@ -1,12 +1,12 @@
 require 'geocoder'
 require 'date'
 require 'csv'
-require 'prawn'
+# require 'prawn'
 
 Geocoder.configure(always_raise: :all)
 
-# data_file = "hurdat2-1851-2023-051124.txt"
-data_file = "test_data.txt"
+data_file = "storm_data/hurdat2-1851-2023-051124.txt"
+# data_file = "storm_data/test_data.txt"
 
 storms = []
 @storm_id = ""
@@ -79,9 +79,9 @@ def coordinates_outside_bounds?(line)
   line[:latitude] < @florida_lat_min || line[:latitude] > @florida_lat_max || line[:longitude] < @florida_lng_min || line[:longitude] > @florida_lng_max 
 end
 
-  #skip if the storm is not a hurricane, or if lat/lng are outside the rough bounds of Florida. This will mean we still check the reverse geocode results for some storms unnecesarily but not nearly as many as without these bounds
+  #skip if the storm is not a hurricane, is before 1900, or if lat/lng are outside the rough bounds of Florida. This will mean we still check the reverse geocode results for some storms unnecesarily but not nearly as many as without these bounds
 def skip_storm_geocoding?(entry)
-  entry[:system_status] != "HU" || coordinates_outside_bounds?(entry)
+  entry[:system_status] != "HU" || entry[:year] < 1900 ||coordinates_outside_bounds?(entry) 
 end
 
 storms.each do |storm|
@@ -100,7 +100,8 @@ storms.each do |storm|
   end
 end
 
-p @results
+# p @results
+# p @results.length
 
 def generate_report(data)
   CSV.open("florida_hurricanes.csv", "wb") do |csv|
