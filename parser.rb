@@ -5,14 +5,17 @@ class Parser
 
   def initialize(data_file)
     @storms = []
-    @storm_id = ""
+    @storm_id = "" 
+    # p data_file
     File.foreach data_file do |line|
+      p line
       if header_line?(line)   #if header line, then set storm id and parse into storms array
         @storm_id = line[0,8]     # set storm_id = to id in the first 8 spaces
         storm = parse_header_line(line)     # parse line then shovel into storms array
         storms << storm
       else    
         best_track_entry = parse_best_track_entry(line)     #parse into best track entry then shovel into best_track_data array
+        p storms.last[:best_track_data].count
         @storms.last[:best_track_data] << best_track_entry
         #set max wind speed for storm equal to the highest max wind speed we find in all best track entries for that storm
         if best_track_entry[:max_sustained_wind] > @storms.last[:max_wind_speed]
@@ -48,7 +51,6 @@ class Parser
       day: line[6,2].to_i,
       hours_utc: line[10,2].to_i,
       minutes: line[12,2].to_i,
-      time_utc: line[10,4].to_i,
       record_identifier: line[16].empty? ? line[16] : nil, #“L” = landfall, but don’t use this identifier for this exercise (1851 - 1970, 1991 onward)
       system_status: line[19,2], #“HU” = hurricane-level storm
       latitude: line[27] == "N" ? line[23,4].to_f : -(line[23,4].to_f), #lat is negative if in southern hemisphere

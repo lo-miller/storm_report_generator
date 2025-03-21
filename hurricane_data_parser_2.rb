@@ -1,14 +1,16 @@
 require 'geocoder'
 require 'date'
 require 'csv'
+require 'rspec'
+require './spec/spec_helper'
 # require 'prawn'
 
 Geocoder.configure(always_raise: :all)
 
-data_file = "storm_data/hurdat2-1851-2023-051124.txt"
-# data_file = "storm_data/test_data.txt"
+# data_file = "storm_data/hurdat2-1851-2023-051124.txt"
+data_file = "storm_data/test_data.txt"
 
-storms = []
+@storms = []
 @storm_id = ""
  
 def header_line?(line)
@@ -36,11 +38,10 @@ def parse_best_track_entry(line)
     day: line[6,2].to_i,
     hours_utc: line[10,2].to_i,
     minutes: line[12,2].to_i,
-    time_utc: line[10,4].to_i,
     record_identifier: line[16].empty? ? line[16] : nil, #“L” = landfall, but don’t use this identifier for this exercise (1851 - 1970, 1991 onward)
     system_status: line[19,2], #“HU” = hurricane-level storm
     latitude: line[27] == "N" ? line[23,4].to_f : -(line[23,4].to_f), #lat is negative if in southern hemisphere
-    longitude: line[35] == "E" ? line[30,4].to_f : -(line[30,4].to_f), #lng is negative if in western hemisphere
+    longitude: line[35] == "E" ? line[30,4].to_f : -(line[30,4]).to_f, #lng is negative if in western hemisphere
     max_sustained_wind: line[38,3].to_i, #in knots
     min_pressure: line[43,4].to_i, #in millibars
     max_extent_34_kt_wind_radii: line[49..118], #this isn't needed for this app, but parsing it for future features
@@ -48,25 +49,26 @@ def parse_best_track_entry(line)
   }
 end
 
-File.foreach data_file do |line|
-  if header_line?(line)   #if header line, then set storm id and parse into storms array
-    @storm_id = line[0,8]     # set storm_id = to id in the first 8 spaces
-    storm = parse_header_line(line)     # parse line then shovel into storms array
-    storms << storm
-  else    
-    best_track_entry = parse_best_track_entry(line)     #parse into best track entry then shovel into best_track_data array
-    storms.last[:best_track_data] << best_track_entry
-    #set max wind speed for storm equal to the highest max wind speed we find in all best track entries for that storm
-    if best_track_entry[:max_sustained_wind] > storms.last[:max_wind_speed]
-      storms.last[:max_wind_speed] = best_track_entry[:max_sustained_wind]
+def parse_storms(data_file)
+  File.foreach data_file do |line|
+    if header_line?(line)   #if header line, then set storm id and parse into storms array
+      @storm_id = line[0,8]     # set storm_id = to id in the first 8 spaces
+      storm = parse_header_line(line)     # parse line then shovel into storms array
+      @storms << storm
+    else    
+      best_track_entry = parse_best_track_entry(line)     #parse into best track entry then shovel into best_track_data array
+      @storms.last[:best_track_data] << best_track_entry
+      #set max wind speed for storm equal to the highest max wind speed we find in all best track entries for that storm
+      if best_track_entry[:max_sustained_wind] > @storms.last[:max_wind_speed]
+        @storms.last[:max_wind_speed] = best_track_entry[:max_sustained_wind]
+      end
     end
   end
 end
 
-#Now that we have parsed the data into a useable format, go through the data to find the storms that make landfall in Florida. They must be designated hurricane (system_status = "HU") and coordinates when geocoded are in Florida (and country == United States)
+parse_storms(data_file)
 
-#If this is true, shovel desired report information  into a results array
-@results = []
+#Now that we have parsed the data into a useable format, go through the data to find the storms that make landfall in Florida. They must be designated hurricane (system_status = "HU") and coordinates when geocoded are in Florida (and country == United States)
 
 #use these lat/lng bounds to reduce number of geocoder gem hits and increase speed - if we want to make this generic, we could  do an initial geocode fetch for the selected/requested state or country, or use a hard-coded lookup table if we know it's just for the US for example
 
@@ -79,12 +81,14 @@ def coordinates_outside_bounds?(line)
   line[:latitude] < @florida_lat_min || line[:latitude] > @florida_lat_max || line[:longitude] < @florida_lng_min || line[:longitude] > @florida_lng_max 
 end
 
-  #skip if the storm is not a hurricane, is before 1900, or if lat/lng are outside the rough bounds of Florida. This will mean we still check the reverse geocode results for some storms unnecesarily but not nearly as many as without these bounds
+#skip if the storm is not a hurricane, is before 1900, or if lat/lng are outside the rough bounds of Florida. 
 def skip_storm_geocoding?(entry)
   entry[:system_status] != "HU" || entry[:year] < 1900 ||coordinates_outside_bounds?(entry) 
 end
 
-storms.each do |storm|
+@results = []
+
+@storms.each do |storm|
   storm[:best_track_data].each do |entry|
     next if skip_storm_geocoding?(entry)
 
@@ -100,9 +104,6 @@ storms.each do |storm|
   end
 end
 
-# p @results
-# p @results.length
-
 def generate_report(data)
   CSV.open("florida_hurricanes.csv", "wb") do |csv|
     csv << data.first.keys # adds the attributes name on the first line
@@ -112,13 +113,4 @@ def generate_report(data)
   end
 end
 
-#looking into how to export as a pdf using Prawn gem - would be a next step
-# def export_report
-#   Prawn::Document.generate('florida_hurricanes.pdf') do |pdf|
-#     pdf.text("florida_hurricanes.csv") 
-#   end
-# end
-
 generate_report(@results)
-
-

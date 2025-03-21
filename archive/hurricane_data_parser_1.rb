@@ -28,7 +28,6 @@ File.foreach data_file do |line|
       day: line[6,2].to_i,
       hours_utc: line[10,2].to_i,
       minutes: line[12,2].to_i,
-      time_utc: line[10,4].to_i,
       record_identifier: line[16].empty? ? line[16] : nil, #“L” = landfall, but don’t use this identifier for this exercise (1851 - 1970, 1991 onward)
       system_status: line[19,2], #“HU” = hurricane-level storm
       latitude: line[27] == "N" ? line[23,4].to_f : -(line[23,4].to_f), #lat is negative if in southern hemisphere
