@@ -5,11 +5,9 @@ require_relative '../parser.rb'
 require 'spec_helper.rb' 
 require 'tempfile'
 
-
 # frozen_string_literal: true
 
-
-describe "parsing" do
+describe Parser do
 
   # let(:test_in_file) do
   #   Tempfile.new('test_data').tap do |f|
@@ -32,17 +30,14 @@ describe "parsing" do
   #   ]
   # end
 
-  # let!(:parser) do
-  #   Parser.new(test_in_file)
-  # end
+  #these specs are not working yet
 
-  # p test_in_file
-  #     parser = Parser.new(test_in_file) 
+  let!(:parser) do
+    Parser.new("storm_data/test_data.txt")
+  end
 
   describe "header_line?" do
     it "returns true for a header line" do
-      
-      # p parser
       line = "AL112009,                IDA,     31,"
       expect(Parser.header_line?(line)).to eq(true)
     end

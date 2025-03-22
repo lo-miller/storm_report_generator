@@ -6,16 +6,13 @@ class Parser
   def initialize(data_file)
     @storms = []
     @storm_id = "" 
-    # p data_file
     File.foreach data_file do |line|
-      p line
       if header_line?(line)   #if header line, then set storm id and parse into storms array
         @storm_id = line[0,8]     # set storm_id = to id in the first 8 spaces
         storm = parse_header_line(line)     # parse line then shovel into storms array
         storms << storm
       else    
         best_track_entry = parse_best_track_entry(line)     #parse into best track entry then shovel into best_track_data array
-        p storms.last[:best_track_data].count
         @storms.last[:best_track_data] << best_track_entry
         #set max wind speed for storm equal to the highest max wind speed we find in all best track entries for that storm
         if best_track_entry[:max_sustained_wind] > @storms.last[:max_wind_speed]
@@ -23,7 +20,6 @@ class Parser
         end
       end
     end
-    # p storms
   end
   
   def header_line?(line)
