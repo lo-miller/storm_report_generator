@@ -6,20 +6,8 @@ class Parser
   def initialize(data_file)
     @storms = []
     @storm_id = "" 
-    File.foreach data_file do |line|
-      if header_line?(line)   #if header line, then set storm id and parse into storms array
-        @storm_id = line[0,8]     # set storm_id = to id in the first 8 spaces
-        storm = parse_header_line(line)     # parse line then shovel into storms array
-        storms << storm
-      else    
-        best_track_entry = parse_best_track_entry(line)     #parse into best track entry then shovel into best_track_data array
-        @storms.last[:best_track_data] << best_track_entry
-        #set max wind speed for storm equal to the highest max wind speed we find in all best track entries for that storm
-        if best_track_entry[:max_sustained_wind] > @storms.last[:max_wind_speed]
-          @storms.last[:max_wind_speed] = best_track_entry[:max_sustained_wind]
-        end
-      end
-    end
+    
+    parse_storms(data_file)
   end
   
   def header_line?(line)
@@ -56,5 +44,22 @@ class Parser
       max_extent_34_kt_wind_radii: line[49..118], #this isn't needed for this app, but parsing it for future features
       max_wind_radius: line[121,4].to_i #in nautical miles
     }
+  end
+
+  def parse_storms(data_file)
+    File.foreach data_file do |line|
+      if header_line?(line)   #if header line, then set storm id and parse into storms array
+        @storm_id = line[0,8]     # set storm_id = to id in the first 8 spaces
+        storm = parse_header_line(line)     # parse line then shovel into storms array
+        storms << storm
+      else    
+        best_track_entry = parse_best_track_entry(line)     #parse into best track entry then shovel into best_track_data array
+        @storms.last[:best_track_data] << best_track_entry
+        #set max wind speed for storm equal to the highest max wind speed we find in all best track entries for that storm
+        if best_track_entry[:max_sustained_wind] > @storms.last[:max_wind_speed]
+          @storms.last[:max_wind_speed] = best_track_entry[:max_sustained_wind]
+        end
+      end
+    end
   end
 end
