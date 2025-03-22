@@ -6,8 +6,8 @@ require './spec/spec_helper'
 
 Geocoder.configure(always_raise: :all)
 
-data_file = "storm_data/hurdat2-1851-2023-051124.txt"
-# data_file = "storm_data/test_data.txt"
+# data_file = "storm_data/hurdat2-1851-2023-051124.txt"
+data_file = "storm_data/test_data.txt"
 
 @storms = []
 @storm_id = ""
@@ -105,7 +105,7 @@ def select_storms(storms)
 end
 
 def generate_report(data)
-  CSV.open("florida_hurricanes_v2.csv", "wb") do |csv|
+  CSV.open("reports/florida_hurricanes_v2_#{DateTime.now()}.csv", "wb") do |csv|
     csv << data.first.keys # adds the attributes name on the first line
     data.each do |hash|
       csv << hash.values

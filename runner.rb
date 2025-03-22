@@ -2,8 +2,8 @@ require_relative "parser"
 require_relative "report_generator"
 require 'geocoder'
 
-data_file = "storm_data/hurdat2-1851-2023-051124.txt"
-# data_file = "storm_data/test_data.txt"
+# data_file = "storm_data/hurdat2-1851-2023-051124.txt"
+data_file = "storm_data/test_data.txt"
 
 storms = Parser.new(data_file).storms
 p "storm data parsed"
