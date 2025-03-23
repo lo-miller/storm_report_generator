@@ -1,6 +1,6 @@
 require 'rspec'
 require 'spec_helper.rb' 
-require_relative '../hurricane_data_parser_2.rb' 
+require_relative '../hurricane_data_parser.rb' 
 
 describe "parsing" do
 

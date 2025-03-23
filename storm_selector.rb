@@ -1,6 +1,5 @@
-require_relative "parser"
-require_relative "report_generator"
 require 'geocoder'
+require 'date'
 
 class StormSelector
   attr_reader :results
