@@ -30,15 +30,15 @@ git clone [https://github.com/lo-miller/storm_report_generator.git](https://gith
   Comment out the appropriate line (`data_file` towards the top of the page) to run either the full data set or a shorter 5-storm test data set (this is faster if you want to run while making changes)
     
 * To run tests, run rspec for the test file like below:
-  * ` rspec spec/hurricane_data_parser_spec.rb` to run one spec file
-    * (note: the specs are working for the first iteration but not yet for the second iteration of the application)
+  * `rspec spec/hurricane_data_parser_spec.rb` or `rspec spec/storm_selector_spec` to run one spec file
+    * (note: the specs are working for the first iteration but not yet complete for the second iteration of the application)
 
 
 
 ### File Notes
 * runner.rb - this runner file calls the other classes to run the program
   * parser.rb - this class parses a text data file and outputs an array of storm data
-  * storm_selector.rb
+  * storm_selector.rb - this class checks an array of storm data and returns storms that satisfy the requirements (in this case making landfall in Florida as a hurricane after 1900)
   * report_generator.rb - this class generates a .csv report to the reports folder given input data
 * hurricane_data_parser.rb - this file does the same as the runner file plus associated classes, but is not broken out into classes/modules yet so it is harder to maintain. This was an early version of the code.
 * spec - specs for the hurricane_data_parser.rb file and the runner.rb file plus associated classes live here
