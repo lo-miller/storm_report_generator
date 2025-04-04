@@ -1,4 +1,4 @@
-# KCC Assessment - Hurricane Data Tracker
+# Hurricane Data Tracker
 
 
 ## Description
